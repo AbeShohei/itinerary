@@ -186,7 +186,7 @@ function App() {
       case 'schedule':
         return selectedTravel ? <ScheduleTab travelInfo={selectedTravel} onNavigate={handleNavigate} places={places} setPlaces={setPlaces} activeTab={activeTab} onTravelInfoUpdate={setSelectedTravel} /> : null;
       case 'places':
-        return <PlacesTab places={places} setPlaces={setPlaces} placeDetailId={placeDetailId} setPlaceDetailId={setPlaceDetailId} onTravelInfoUpdate={setSelectedTravel} />;
+        return <PlacesTab places={places} setPlaces={setPlaces} travel_id={selectedTravel.id} placeDetailId={placeDetailId} setPlaceDetailId={setPlaceDetailId} onTravelInfoUpdate={setSelectedTravel} />;
       case 'ai-recommendations':
         return <AIRecommendationsTab 
           onAddToPlaces={handleAddToPlaces}
