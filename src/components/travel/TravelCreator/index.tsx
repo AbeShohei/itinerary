@@ -163,7 +163,7 @@ const TravelCreator: React.FC<TravelCreatorProps> = ({ onBack, onComplete, user 
         schedule: templates.schedule,
         places: [], // 観光スポットは空
         budget_breakdown: [], // 予算内訳も空
-        roomAssignments: [], // 部屋割りも空
+        roomAssignments: [], // 必ず空配列
         packingList: [], // 持ち物も空
         travelType: formData.travelType,
         user_id: user.id, // ←追加
@@ -237,6 +237,8 @@ const TravelCreator: React.FC<TravelCreatorProps> = ({ onBack, onComplete, user 
         schedule: generatedPlan?.schedule || [],
         places: generatedPlan?.places || [],
         budget_breakdown: breakdownArr2, // ←必ずセット
+        roomAssignments: [], // 必ず空配列
+        packingList: [],
         travelType: formData.travelType,
         user_id: user.id, // ←追加
       };
