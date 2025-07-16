@@ -137,11 +137,20 @@ const TravelCatalog: React.FC<TravelCatalogProps> = ({
    */
   const handleUpdateTravel = async (updatedTravel: Travel) => {
     try {
-      const updated = await travelApi.updateTravel(updatedTravel.id, updatedTravel);
+      // キャメルケース→スネークケース変換
+      const { startDate, endDate, memberCount, travelType, updatedAt, ...rest } = updatedTravel;
+      const updates = {
+        ...rest,
+        start_date: startDate,
+        end_date: endDate,
+        member_count: memberCount ?? updatedTravel.member_count,
+        travel_type: travelType ?? updatedTravel.travel_type,
+        updated_at: updatedAt ?? new Date().toISOString().split('T')[0], // ← 追加
+      };
+      const updated = await travelApi.updateTravel(updatedTravel.id, updates);
       setTravels(prev => prev.map(travel => 
         travel.id === updated.id ? updated : travel
-    ));
-      // 更新成功後にモーダルを閉じる
+      ));
       setIsEditModalOpen(false);
       setEditTarget(null);
     } catch (err) {
