@@ -127,53 +127,31 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
   // 旅行情報が変更された時にメンバーと日付を自動生成
   useEffect(() => {
     console.log('RoomAssignmentTab: travelInfo received:', travelInfo);
-    
     if (travelInfo && travelInfo.startDate && travelInfo.endDate) {
-      // メンバーの自動生成
-      const memberCount = travelInfo.memberCount || 4; // デフォルト4名
-      console.log('RoomAssignmentTab: Generating members for count:', memberCount);
-      const generatedMembers = generateMembersFromTravelInfo(memberCount);
-      setMembers(generatedMembers);
-      
-      // 日付の自動生成
+      // メンバーの自動生成は行わない
+      // 日付の自動生成のみ
       const start = new Date(travelInfo.startDate);
       const end = new Date(travelInfo.endDate);
-      
-      // 宿泊日数を計算（終了日は含まない）
       const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       console.log('RoomAssignmentTab: Generating dates for nights:', nights);
-      
-      // 日数が0以下の場合は処理しない
       if (nights <= 0) {
         setDayAssignments([]);
         setCurrentDayIndex(0);
         return;
       }
-      
       const days: DayAssignment[] = [];
       let current = new Date(start);
-      
       for (let dayCount = 1; dayCount <= nights; dayCount++) {
-        // 日付の詳細情報を取得
-        const dateStr = current.toLocaleDateString('ja-JP', { 
-          year: 'numeric', 
-          month: '2-digit', 
-          day: '2-digit' 
-        });
-        
+        const dateStr = current.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
         const dayOfWeek = current.toLocaleDateString('ja-JP', { weekday: 'short' });
         const fullDateStr = `${dateStr} (${dayOfWeek})`;
-        
         days.push({
           date: fullDateStr,
           day: `${dayCount}日目`,
           roomAssignments: {}
         });
-        
-        // 次の日付に移動
         current.setDate(current.getDate() + 1);
       }
-      
       setDayAssignments(days);
       setCurrentDayIndex(0);
       console.log('RoomAssignmentTab: Generated days:', days);
@@ -205,19 +183,7 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
   useEffect(() => {
     if (travelInfo?.id) {
       memberApi.getMembers(travelInfo.id).then(async (members) => {
-        if (members.length > 0) {
-          setMembers(members);
-        } else if (travelInfo.memberCount) {
-          // DBにいない場合のみ一度だけテンプレートメンバーを生成
-          const templateMembers = Array.from({ length: travelInfo.memberCount }).map((_, i) => ({
-            name: `メンバー${i + 1}`,
-            gender: Math.random() > 0.5 ? 'male' : 'female',
-            preferences: [],
-            travel_id: travelInfo.id,
-          }));
-          const created = await Promise.all(templateMembers.map(m => memberApi.createMember(m)));
-          setMembers(created);
-        }
+        setMembers(members); // 0件でも空のまま
       });
     }
   }, [travelInfo?.id, travelInfo?.memberCount]);
