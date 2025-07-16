@@ -1,0 +1,19 @@
+{
+  "name": "travel-api",
+  "version": "1.0.0",
+  "description": "Travel App API for Supabase Edge Functions",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "supabase functions serve travel-api --env-file .env.local"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.39.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "typescript": "^5.3.3"
+  }
+} 
