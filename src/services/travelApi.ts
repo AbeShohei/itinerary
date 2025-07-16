@@ -344,7 +344,7 @@ export const placeApi = {
   async getPlaces(travelId: string): Promise<Place[]> {
     const { data, error } = await supabase
       .from('place')
-      .select('*')
+      .select('id, travel_id, schedule_id, name, category, main_category, rating, image, description, address, phone, website, opening_hours, price_range, is_favorite, created_at, updated_at')
       .eq('travel_id', travelId)
       .order('created_at', { ascending: false })
 
