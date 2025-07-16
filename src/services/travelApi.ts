@@ -41,6 +41,8 @@ export interface Place {
   description?: string
   created_at?: string
   updated_at?: string
+  main_category?: string
+  mainCategory?: string
 }
 
 export interface Budget {
@@ -344,37 +346,44 @@ export const placeApi = {
   async getPlaces(travelId: string): Promise<Place[]> {
     const { data, error } = await supabase
       .from('place')
-      .select('id, travel_id, schedule_id, name, category, main_category, rating, image, description, address, phone, website, opening_hours, price_range, is_favorite, created_at, updated_at')
+      .select('id, travel_id, schedule_id, name, category, main_category, rating, description, created_at, updated_at')
       .eq('travel_id', travelId)
       .order('created_at', { ascending: false })
 
     if (error) throw error
-    return data || []
+    // main_category→mainCategoryに変換
+    return (data || []).map((p: any) => ({ ...p, mainCategory: p.main_category }));
   },
 
   // 観光スポット作成
-  async createPlace(place: Omit<Place, 'id' | 'created_at' | 'updated_at'>): Promise<Place> {
+  async createPlace(place: any): Promise<Place> {
+    // mainCategory→main_categoryに変換
+    const { mainCategory, ...rest } = place;
+    const insertObj = { ...rest, main_category: mainCategory };
     const { data, error } = await supabase
       .from('place')
-      .insert([place])
+      .insert([insertObj])
       .select()
       .single()
 
     if (error) throw error
-    return data
+    return { ...data, mainCategory: data.main_category };
   },
 
   // 観光スポット更新
-  async updatePlace(id: string, updates: Partial<Place>): Promise<Place> {
+  async updatePlace(id: string, updates: any): Promise<Place> {
+    // mainCategory→main_categoryに変換
+    const { mainCategory, ...rest } = updates;
+    const updateObj = { ...rest, main_category: mainCategory };
     const { data, error } = await supabase
       .from('place')
-      .update(updates)
+      .update(updateObj)
       .eq('id', id)
       .select()
       .single()
 
     if (error) throw error
-    return data
+    return { ...data, mainCategory: data.main_category };
   },
 
   // 観光スポット削除

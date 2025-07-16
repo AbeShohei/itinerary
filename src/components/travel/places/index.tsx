@@ -35,14 +35,15 @@ interface Place {
 interface PlacesTabProps {
   places: Place[];
   setPlaces: (places: Place[]) => void;
-  onTravelInfoUpdate?: (travel: any) => void; // 追加
+  travel_id: string; // キャメル→スネーク
+  onTravelInfoUpdate?: (travel: any) => void;
 }
 
 /**
  * 観光スポットタブコンポーネント
  * 観光スポットの一覧表示、追加、編集、削除機能を提供
  */
-const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDetailId?: (id: string | null) => void }> = ({ places, setPlaces, placeDetailId, setPlaceDetailId, onTravelInfoUpdate }) => {
+const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDetailId?: (id: string | null) => void }> = ({ places, setPlaces, travel_id, placeDetailId, setPlaceDetailId, onTravelInfoUpdate }) => {
   // 観光スポットデータの状態
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -59,6 +60,22 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
       }
     }
   }, [placeDetailId, places]);
+
+  // 追加: APIから観光スポットリストを取得する関数
+  const fetchPlaces = async () => {
+    try {
+      const data = await placeApi.getPlaces(travel_id);
+      setPlaces(data);
+    } catch (e) {
+      console.error('観光スポットの取得に失敗しました', e);
+    }
+  };
+
+  // travel_idが変わったらリストを再取得
+  React.useEffect(() => {
+    fetchPlaces();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [travel_id]);
 
   // カテゴリフィルター関連のstate・UI・ロジックを削除
   // 1. selectedCategory, categories, setSelectedCategory, category-filter selectタグ、filteredPlaces, filteredPlacesWithMain, withMainCategory, groupByMainCategory, groupedPlaces などを削除
@@ -106,8 +123,7 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
       if (isUuid(deletingPlaceId)) {
         await placeApi.deletePlace(deletingPlaceId);
       }
-      // uuidでなくてもローカルからは消す
-      setPlaces(prev => prev.filter(place => String(place.id) !== String(deletingPlaceId)));
+      await fetchPlaces();
     }
     setShowDeleteConfirm(false);
     setDeletingPlaceId(null);
@@ -117,10 +133,10 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
    * 新しい観光スポットを保存
    */
   const saveNewPlace = async (place: Place) => {
-    // idを除去してAPIに渡す
-    const { id, ...placeWithoutId } = place;
-    const created = await placeApi.createPlace(placeWithoutId);
-    setPlaces(prev => [...prev, created]);
+    // idを除去し、テーブルに存在するカラムだけ抽出し、travel_idを必ずセット
+    const { id, image, address, phone, website, openingHours, priceRange, isFavorite, mainCategory, ...rest } = place;
+    await placeApi.createPlace({ ...rest, travel_id, mainCategory });
+    await fetchPlaces();
     setShowAddModal(false);
   };
 
@@ -129,15 +145,20 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
    */
   const saveEditedPlace = async (place: Place) => {
     if (!place.id) return;
-    const updated = await placeApi.updatePlace(place.id, place);
-    setPlaces(prev => prev.map(p => p.id === place.id ? updated : p));
+    // テーブルに存在するカラムだけ抽出
+    const {
+      id, travel_id, schedule_id, name, category, rating, description, created_at, updated_at, mainCategory
+    } = place;
+    const updateObj = { travel_id, schedule_id, name, category, rating, description, created_at, updated_at, mainCategory };
+    await placeApi.updatePlace(id, updateObj);
+    await fetchPlaces();
     setShowEditModal(false);
     setEditingPlace(null);
     // 親のtravelInfoも更新
     if (onTravelInfoUpdate) {
       onTravelInfoUpdate((prev: any) => {
         if (!prev) return prev;
-        return { ...prev, places: prev.places.map((p: any) => p.id === place.id ? updated : p) };
+        return { ...prev, places: prev.places.map((p: any) => p.id === place.id ? place : p) };
       });
     }
   };

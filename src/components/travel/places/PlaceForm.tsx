@@ -120,10 +120,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ place, onSave, onCancel }) => {
     return (
       formData.name?.trim() !== '' &&
       formData.description?.trim() !== '' &&
-      formData.address?.trim() !== '' &&
-      formData.openingHours?.trim() !== '' &&
-      formData.priceRange?.trim() !== '' &&
-      formData.mainCategory
+      formData.category?.trim() !== ''
     );
   };
 
@@ -162,6 +159,7 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ place, onSave, onCancel }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 基本情報 */}
         <div className="space-y-4">
+          {/* スポット名 */}
           <Input
             label="スポット名"
             value={formData.name || ''}
@@ -169,8 +167,20 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ place, onSave, onCancel }) => {
             placeholder="例: 首里城"
             required
           />
-          
-          {/* カテゴリ入力部分を修正 */}
+          {/* 説明（textareaのみ残す） */}
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              説明
+            </label>
+            <textarea
+              value={formData.description || ''}
+              onChange={e => handleInputChange('description', e.target.value)}
+              placeholder="例: 世界遺産の城跡"
+              rows={3}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+          </div>
           <div className="space-y-1">
             <label htmlFor="category-input" className="block text-sm font-medium text-gray-700">
               カテゴリ（バッジ表示・10文字まで）
@@ -256,26 +266,11 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ place, onSave, onCancel }) => {
         
         {/* 詳細情報 */}
         <div className="space-y-4">
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
-              説明
-            </label>
-            <textarea
-              value={formData.description || ''}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="スポットの説明を入力"
-              rows={3}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
-          
           <Input
             label="住所"
             value={formData.address || ''}
             onChange={(value) => handleInputChange('address', value)}
             placeholder="例: 沖縄県那覇市首里金城町1-2"
-            required
           />
           
           <Input
@@ -296,16 +291,14 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ place, onSave, onCancel }) => {
             label="営業時間"
             value={formData.openingHours || ''}
             onChange={(value) => handleInputChange('openingHours', value)}
-            placeholder="例: 8:00-19:30"
-            required
+            placeholder="例: 9:00-17:00"
           />
           
           <Input
             label="料金"
             value={formData.priceRange || ''}
             onChange={(value) => handleInputChange('priceRange', value)}
-            placeholder="例: ¥400-¥800"
-            required
+            placeholder="例: 1000"
           />
         </div>
       </div>
