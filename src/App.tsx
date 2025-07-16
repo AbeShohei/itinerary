@@ -126,7 +126,6 @@ function App() {
       // メモ
       await addNote({
         travel_id: travel.id,
-        user_id: user.id,
         title: '最初のメモ',
         content: '',
         category: '旅行準備',
@@ -135,7 +134,6 @@ function App() {
       // 持ち物
       await packingApi.createPackingItem({
         travel_id: travel.id,
-        user_id: user.id,
         name: 'パスポート',
         category: '必需品',
         quantity: 1,
@@ -145,7 +143,6 @@ function App() {
       // 予算
       await budgetApi.createBudget({
         travel_id: travel.id,
-        user_id: user.id,
         amount: 0,
         breakdown: { category: '全体予算', title: '初期予算', type: 'initial' },
       });
@@ -209,7 +206,6 @@ function App() {
          return selectedTravel && typeof selectedTravel.id === 'string' ? (
            <PackingTab
              travelId={selectedTravel.id}
-             userId={user.id}
              packingData={('packingList' in selectedTravel) ? (selectedTravel as any).packingList : undefined}
              travelType={selectedTravel.travelType || 'domestic'}
            />

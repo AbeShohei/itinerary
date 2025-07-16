@@ -10,8 +10,8 @@ interface PackingItem {
   name: string;
   category: string;
   quantity: number;
-  isPacked: boolean;
-  isEssential: boolean;
+  is_packed: boolean;
+  is_essential: boolean;
 }
 
 /**
@@ -44,8 +44,8 @@ const PackingItemForm: React.FC<PackingItemFormProps> = ({
     name: '',
     category: categories[0] || 'その他',
     quantity: 1,
-    isPacked: false,
-    isEssential: false
+    is_packed: false,
+    is_essential: false
   });
 
   /**
@@ -57,8 +57,8 @@ const PackingItemForm: React.FC<PackingItemFormProps> = ({
         name: item.name,
         category: item.category,
         quantity: item.quantity,
-        isPacked: item.isPacked,
-        isEssential: item.isEssential
+        is_packed: item.is_packed,
+        is_essential: item.is_essential
       });
     }
   }, [item]);
@@ -94,8 +94,8 @@ const PackingItemForm: React.FC<PackingItemFormProps> = ({
         name: formData.name!,
         category: formData.category!,
         quantity: formData.quantity!,
-        isPacked: formData.isPacked || false,
-        isEssential: formData.isEssential || false
+        is_packed: formData.is_packed || false,
+        is_essential: formData.is_essential || false
       };
       onSave(newItem);
     }
@@ -151,8 +151,8 @@ const PackingItemForm: React.FC<PackingItemFormProps> = ({
           <input
             type="checkbox"
             id="is-essential"
-            checked={formData.isEssential || false}
-            onChange={(e) => handleInputChange('isEssential', e.target.checked)}
+            checked={formData.is_essential || false}
+            onChange={(e) => handleInputChange('is_essential', e.target.checked)}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <label htmlFor="is-essential" className="text-sm font-medium text-gray-700">
@@ -165,8 +165,8 @@ const PackingItemForm: React.FC<PackingItemFormProps> = ({
           <input
             type="checkbox"
             id="is-packed"
-            checked={formData.isPacked || false}
-            onChange={(e) => handleInputChange('isPacked', e.target.checked)}
+            checked={formData.is_packed || false}
+            onChange={(e) => handleInputChange('is_packed', e.target.checked)}
             className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
           />
           <label htmlFor="is-packed" className="text-sm font-medium text-gray-700">

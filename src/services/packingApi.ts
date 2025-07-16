@@ -14,12 +14,11 @@ export interface PackingItem {
 
 export const packingApi = {
   // 持ち物リスト取得
-  async getPackingItems(travelId: string, userId: string): Promise<PackingItem[]> {
+  async getPackingItems(travelId: string): Promise<PackingItem[]> {
     const { data, error } = await supabase
       .from('packing_item')
       .select('*')
       .eq('travel_id', travelId)
-      .eq('user_id', userId)
       .order('created_at', { ascending: true });
     if (error) throw error;
     return data || [];

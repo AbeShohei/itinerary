@@ -17,8 +17,8 @@ interface PackingItem {
   name: string;
   category: string;
   quantity: number;
-  isPacked: boolean;
-  isEssential: boolean;
+  is_packed: boolean;
+  is_essential: boolean;
 }
 
 /**
@@ -28,7 +28,7 @@ interface PackingData {
   name: string;
   category: string;
   quantity?: number;
-  isEssential?: boolean;
+  is_essential?: boolean;
 }
 
 /**
@@ -41,7 +41,6 @@ type TravelType = 'domestic' | 'international';
  */
 interface PackingTabProps {
   travelId: string;
-  userId: string;
   packingData?: PackingData[];
   travelType?: TravelType;
 }
@@ -50,68 +49,68 @@ interface PackingTabProps {
  * 国内旅行の固定テンプレート
  */
 const domesticTemplate: PackingItem[] = [
-  { id: 'dom-1', name: '身分証明書', category: '書類', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'dom-2', name: '現金・クレジットカード', category: '書類', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'dom-3', name: 'Tシャツ', category: '衣類', quantity: 3, isPacked: false, isEssential: false },
-  { id: 'dom-4', name: 'ズボン・スカート', category: '衣類', quantity: 2, isPacked: false, isEssential: false },
-  { id: 'dom-5', name: '下着', category: '衣類', quantity: 3, isPacked: false, isEssential: false },
-  { id: 'dom-6', name: '靴下', category: '衣類', quantity: 3, isPacked: false, isEssential: false },
-  { id: 'dom-7', name: 'パジャマ', category: '衣類', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-8', name: '歯ブラシ・歯磨き粉', category: '美容・健康', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'dom-9', name: 'シャンプー・ボディソープ', category: '美容・健康', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-10', name: 'タオル', category: '美容・健康', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'dom-11', name: 'スマートフォン', category: '電子機器', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'dom-12', name: '充電器', category: '電子機器', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'dom-13', name: 'モバイルバッテリー', category: '電子機器', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-14', name: 'カメラ', category: '電子機器', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-15', name: '常備薬', category: '美容・健康', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'dom-16', name: '日焼け止め', category: '美容・健康', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-17', name: 'サングラス', category: 'アクセサリー', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-18', name: '帽子', category: 'アクセサリー', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-19', name: '傘', category: 'その他', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'dom-20', name: 'ゴミ袋', category: 'その他', quantity: 3, isPacked: false, isEssential: false }
+  { id: 'dom-1', name: '身分証明書', category: '書類', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'dom-2', name: '現金・クレジットカード', category: '書類', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'dom-3', name: 'Tシャツ', category: '衣類', quantity: 3, is_packed: false, is_essential: false },
+  { id: 'dom-4', name: 'ズボン・スカート', category: '衣類', quantity: 2, is_packed: false, is_essential: false },
+  { id: 'dom-5', name: '下着', category: '衣類', quantity: 3, is_packed: false, is_essential: false },
+  { id: 'dom-6', name: '靴下', category: '衣類', quantity: 3, is_packed: false, is_essential: false },
+  { id: 'dom-7', name: 'パジャマ', category: '衣類', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-8', name: '歯ブラシ・歯磨き粉', category: '美容・健康', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'dom-9', name: 'シャンプー・ボディソープ', category: '美容・健康', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-10', name: 'タオル', category: '美容・健康', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'dom-11', name: 'スマートフォン', category: '電子機器', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'dom-12', name: '充電器', category: '電子機器', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'dom-13', name: 'モバイルバッテリー', category: '電子機器', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-14', name: 'カメラ', category: '電子機器', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-15', name: '常備薬', category: '美容・健康', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'dom-16', name: '日焼け止め', category: '美容・健康', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-17', name: 'サングラス', category: 'アクセサリー', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-18', name: '帽子', category: 'アクセサリー', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-19', name: '傘', category: 'その他', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'dom-20', name: 'ゴミ袋', category: 'その他', quantity: 3, is_packed: false, is_essential: false }
 ];
 
 /**
  * 海外旅行の固定テンプレート
  */
 const internationalTemplate: PackingItem[] = [
-  { id: 'int-1', name: 'パスポート', category: '書類', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-2', name: 'ビザ（必要に応じて）', category: '書類', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-3', name: '航空券', category: '書類', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-4', name: '海外旅行保険証書', category: '書類', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-5', name: '国際運転免許証（必要に応じて）', category: '書類', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-6', name: '現金（現地通貨）', category: '書類', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-7', name: 'クレジットカード', category: '書類', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-8', name: 'Tシャツ', category: '衣類', quantity: 5, isPacked: false, isEssential: false },
-  { id: 'int-9', name: 'ズボン・スカート', category: '衣類', quantity: 3, isPacked: false, isEssential: false },
-  { id: 'int-10', name: '下着', category: '衣類', quantity: 5, isPacked: false, isEssential: false },
-  { id: 'int-11', name: '靴下', category: '衣類', quantity: 5, isPacked: false, isEssential: false },
-  { id: 'int-12', name: 'パジャマ', category: '衣類', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-13', name: '歯ブラシ・歯磨き粉', category: '美容・健康', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-14', name: 'シャンプー・ボディソープ', category: '美容・健康', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-15', name: 'タオル', category: '美容・健康', quantity: 2, isPacked: false, isEssential: true },
-  { id: 'int-16', name: 'スマートフォン', category: '電子機器', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-17', name: '充電器', category: '電子機器', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-18', name: 'モバイルバッテリー', category: '電子機器', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-19', name: 'カメラ', category: '電子機器', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-20', name: '変換プラグ', category: '電子機器', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-21', name: '常備薬', category: '美容・健康', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-22', name: '日焼け止め', category: '美容・健康', quantity: 1, isPacked: false, isEssential: true },
-  { id: 'int-23', name: '虫除けスプレー', category: '美容・健康', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-24', name: 'サングラス', category: 'アクセサリー', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-25', name: '帽子', category: 'アクセサリー', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-26', name: '傘', category: 'その他', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-27', name: 'ゴミ袋', category: 'その他', quantity: 5, isPacked: false, isEssential: false },
-  { id: 'int-28', name: '辞書・翻訳アプリ', category: 'その他', quantity: 1, isPacked: false, isEssential: false },
-  { id: 'int-29', name: '現地の地図', category: 'その他', quantity: 1, isPacked: false, isEssential: false }
+  { id: 'int-1', name: 'パスポート', category: '書類', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-2', name: 'ビザ（必要に応じて）', category: '書類', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-3', name: '航空券', category: '書類', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-4', name: '海外旅行保険証書', category: '書類', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-5', name: '国際運転免許証（必要に応じて）', category: '書類', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-6', name: '現金（現地通貨）', category: '書類', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-7', name: 'クレジットカード', category: '書類', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-8', name: 'Tシャツ', category: '衣類', quantity: 5, is_packed: false, is_essential: false },
+  { id: 'int-9', name: 'ズボン・スカート', category: '衣類', quantity: 3, is_packed: false, is_essential: false },
+  { id: 'int-10', name: '下着', category: '衣類', quantity: 5, is_packed: false, is_essential: false },
+  { id: 'int-11', name: '靴下', category: '衣類', quantity: 5, is_packed: false, is_essential: false },
+  { id: 'int-12', name: 'パジャマ', category: '衣類', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-13', name: '歯ブラシ・歯磨き粉', category: '美容・健康', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-14', name: 'シャンプー・ボディソープ', category: '美容・健康', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-15', name: 'タオル', category: '美容・健康', quantity: 2, is_packed: false, is_essential: true },
+  { id: 'int-16', name: 'スマートフォン', category: '電子機器', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-17', name: '充電器', category: '電子機器', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-18', name: 'モバイルバッテリー', category: '電子機器', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-19', name: 'カメラ', category: '電子機器', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-20', name: '変換プラグ', category: '電子機器', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-21', name: '常備薬', category: '美容・健康', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-22', name: '日焼け止め', category: '美容・健康', quantity: 1, is_packed: false, is_essential: true },
+  { id: 'int-23', name: '虫除けスプレー', category: '美容・健康', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-24', name: 'サングラス', category: 'アクセサリー', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-25', name: '帽子', category: 'アクセサリー', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-26', name: '傘', category: 'その他', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-27', name: 'ゴミ袋', category: 'その他', quantity: 5, is_packed: false, is_essential: false },
+  { id: 'int-28', name: '辞書・翻訳アプリ', category: 'その他', quantity: 1, is_packed: false, is_essential: false },
+  { id: 'int-29', name: '現地の地図', category: 'その他', quantity: 1, is_packed: false, is_essential: false }
 ];
 
 /**
  * パッキングタブコンポーネント
  * パッキングリストの管理、アイテムの追加・編集・削除機能を提供
  */
-const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, travelType = 'domestic' }) => {
+const PackingTab: React.FC<PackingTabProps> = ({ travelId, packingData, travelType = 'domestic' }) => {
   const [items, setItems] = useState<PackingItemDB[]>([]);
   const [categories, setCategories] = useState<string[]>([
     '書類', '衣類', '美容・健康', 'アクセサリー', '電子機器', 'その他'
@@ -127,9 +126,9 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
 
   // Supabaseから持ち物リストを取得
   const fetchPackingItems = async () => {
-    if (!travelId || !userId) return;
+    if (!travelId) return;
     try {
-      const data = await packingApi.getPackingItems(travelId, userId);
+      const data = await packingApi.getPackingItems(travelId);
       setItems(data);
     } catch (e) {
       alert('持ち物リストの取得に失敗しました');
@@ -139,11 +138,11 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
 
   // 初期ロード・DBにデータがなければテンプレートをinsert
   useEffect(() => {
-    if (!travelId || !userId || initializedRef.current) return;
+    if (!travelId || initializedRef.current) return;
     initializedRef.current = true;
     (async () => {
       try {
-        const items = await packingApi.getPackingItems(travelId, userId);
+        const items = await packingApi.getPackingItems(travelId);
         setItems(items);
       } catch (e) {
         alert('持ち物リストの初期化に失敗しました');
@@ -151,11 +150,11 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
       }
     })();
     // eslint-disable-next-line
-  }, [travelId, userId, travelType, JSON.stringify(packingData)]);
+  }, [travelId, travelType, JSON.stringify(packingData)]);
 
   // パッキング状態切り替え
   const togglePacked = async (id: string) => {
-    if (!travelId || !userId) return;
+    if (!travelId) return;
     const item = items.find(i => i.id === id);
     if (!item) return;
     try {
@@ -186,7 +185,7 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
 
   // アイテム削除
   const confirmDelete = async () => {
-    if (!deletingItemId || !travelId || !userId) return;
+    if (!deletingItemId || !travelId) return;
     try {
       await packingApi.deletePackingItem(deletingItemId);
       setShowDeleteConfirm(false);
@@ -200,11 +199,10 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
 
   // アイテム追加
   const saveNewItem = async (item: PackingItemDB) => {
-    if (!travelId || !userId) return;
+    if (!travelId) return;
     try {
       await packingApi.createPackingItem({
         travel_id: travelId,
-        user_id: userId,
         name: item.name,
         category: item.category,
         quantity: item.quantity,
@@ -221,7 +219,7 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
 
   // アイテム編集
   const saveEditedItem = async (item: PackingItemDB) => {
-    if (!travelId || !userId) return;
+    if (!travelId) return;
     try {
       await packingApi.updatePackingItem(item.id!, {
         name: item.name,
