@@ -59,6 +59,7 @@ const TravelDetailHeader: React.FC<TravelDetailHeaderProps> = ({
             {title}
           </h1>
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+            {/* 日付＋宿泊日数 */}
             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
               <CalendarTodayIcon style={{ fontSize: 16 }} />
               {startDate && endDate ? (
@@ -70,57 +71,29 @@ const TravelDetailHeader: React.FC<TravelDetailHeaderProps> = ({
               ) : (
                 <span>未設定</span>
               )}
+              {duration && (
+                <span className="flex items-center gap-1 ml-2 text-purple-600 dark:text-purple-400">
+                  <HotelIcon style={{ fontSize: 16 }} />
+                  <span>{duration}</span>
+                </span>
+              )}
             </div>
-            {destination && destination !== '未設定' ? (
-              <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                <LocationOnIcon style={{ fontSize: 16 }} />
-                <span>{destination}</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                <LocationOnIcon style={{ fontSize: 16 }} />
-                <span>未設定</span>
-              </div>
-            )}
-            {memberCount && memberCount > 0 && (
-              <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                <GroupIcon style={{ fontSize: 16 }} />
-                <span>{memberCount}名</span>
-              </div>
-            )}
-            {duration && (
-              <div className="flex items-center gap-1 text-sm text-purple-600 dark:text-purple-400">
-                <HotelIcon style={{ fontSize: 16 }} />
-                <span>{duration}</span>
-              </div>
-            )}
+            {/* 目的地＋グループ人数 */}
+            <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 font-medium">
+              <LocationOnIcon style={{ fontSize: 16 }} />
+              <span>{destination && destination !== '未設定' ? destination : '未設定'}</span>
+              {memberCount && memberCount > 0 && (
+                <span className="flex items-center gap-1 text-green-600 dark:text-green-400 ml-2">
+                  <GroupIcon style={{ fontSize: 16 }} />
+                  <span>{memberCount}名</span>
+                </span>
+              )}
+            </div>
           </div>
         </div>
         
-        {/* 右：プロフィールアイコン＋メニュー */}
-        <div className="relative">
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            aria-label="プロフィールメニュー"
-          >
-            <AccountCircleIcon style={{ fontSize: 32, color: '#4B5563' }} className="dark:text-gray-200" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm">
-                {userEmail}
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="w-full text-left px-4 py-3 text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg text-sm flex items-center gap-2"
-              >
-                <LogoutIcon style={{ fontSize: 16 }} />
-                ログアウト
-              </button>
-            </div>
-          )}
-        </div>
+        {/* 右：プロフィールアイコン＋メニュー（削除） */}
+        {/* <div className="relative"> ... </div> 削除 */}
       </div>
       
       {/* タブナビゲーションをヘッダー下部に追加 */}

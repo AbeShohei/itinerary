@@ -56,6 +56,12 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     }
   });
 
+  // 総支出（type: 'expense'のみ合計）はpropsのtotalExpensesを使う
+  // const totalExpenses = expenses.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0); // ←削除
+
+  // 支出率（分母は必ずtotalBudget）
+  const expenseRate = totalBudget > 0 ? totalExpenses / totalBudget : 0;
+
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [editValue, setEditValue] = useState(totalBudget);
 
@@ -64,11 +70,24 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     setEditModalOpen(true);
   };
   const handleEditSave = async () => {
-    // 予算をAPIで更新
     try {
-      const { travelApi } = await import('../../../services/travelApi');
+      const { travelApi, budgetApi } = await import('../../../services/travelApi');
       await travelApi.updateTravel(travelId, { budget: editValue });
-      onBudgetUpdate(editValue);
+      // budgetテーブルの自分のamountも同期
+      const budgets = await budgetApi.getBudgets(travelId, userId);
+      if (budgets.length > 0) {
+        await budgetApi.updateBudget(budgets[0].id, { amount: editValue });
+      } else {
+        // もし自分のbudgetレコードがなければ新規作成
+        await budgetApi.createBudget({
+          travel_id: travelId,
+          user_id: userId,
+          amount: editValue,
+          breakdown: { category: '全体予算', title: '初期予算', type: 'initial' }
+        });
+      }
+      const updated = await travelApi.getTravel(travelId);
+      onBudgetUpdate(updated.budget);
       setEditModalOpen(false);
     } catch (e) {
       alert('予算の保存に失敗しました');

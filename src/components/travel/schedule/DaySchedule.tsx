@@ -47,6 +47,7 @@ interface DayScheduleProps {
   onEditDay: (day: DaySchedule, dayIndex: number) => void;
   onReorderItems?: (newItems: ScheduleItem[], dayIndex: number) => void;
   onNavigate?: (tab: string, id?: string) => void;
+  isEditMode: boolean; // 追加
 }
 
 /**
@@ -61,7 +62,8 @@ const MovableScheduleItem: React.FC<{
   onMoveUp: () => void;
   onMoveDown: () => void;
   onNavigate?: (tab: string, id?: string) => void;
-}> = ({ item, isFirst, isLast, onEdit, onDelete, onMoveUp, onMoveDown, onNavigate }) => {
+  isEditMode: boolean; // 追加
+}> = ({ item, isFirst, isLast, onEdit, onDelete, onMoveUp, onMoveDown, onNavigate, isEditMode }) => {
   const [isHovered, setIsHovered] = React.useState(false);
 
   return (
@@ -77,6 +79,7 @@ const MovableScheduleItem: React.FC<{
         onEdit={onEdit}
         onDelete={onDelete}
         onNavigate={onNavigate}
+        isEditMode={isEditMode} // 追加
       />
       
       {/* 移動ボタン */}
@@ -118,7 +121,8 @@ const DayScheduleComponent: React.FC<DayScheduleProps> = ({
   onDeleteItem,
   onEditDay,
   onReorderItems,
-  onNavigate
+  onNavigate,
+  isEditMode // 追加
 }) => {
   // 開閉トグル用state
   const [isOpen, setIsOpen] = React.useState(true);
@@ -216,49 +220,76 @@ const DayScheduleComponent: React.FC<DayScheduleProps> = ({
       {/* スケジュールアイテム一覧（開いているときのみ表示） */}
       {isOpen && (
         <div className="p-6">
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId={`droppable-day-${dayIndex}`}> 
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {day.items.length > 0 ? (
-                    day.items.map((item, idx) => (
-                      <Draggable key={item.id} draggableId={item.id} index={idx}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={{
-                              ...provided.draggableProps.style,
-                              opacity: snapshot.isDragging ? 0.7 : 1,
-                              marginBottom: 8
-                            }}
-                          >
-                            <MovableScheduleItem
-                              item={item}
-                              isFirst={idx === 0}
-                              isLast={idx === day.items.length - 1}
-                              onEdit={(item) => onEditItem(item, dayIndex)}
-                              onDelete={(itemId) => onDeleteItem(itemId, dayIndex)}
-                              onMoveUp={() => {}}
-                              onMoveDown={() => {}}
-                              onNavigate={onNavigate}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>予定がありません</p>
-                      <p className="text-sm mt-1">「予定を追加」ボタンから予定を追加してください</p>
-                    </div>
-                  )}
-                  {provided.placeholder}
+          {isEditMode ? (
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId={`droppable-day-${dayIndex}`}>
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
+                    {day.items.length > 0 ? (
+                      day.items.map((item, idx) => (
+                        <Draggable key={item.id} draggableId={item.id} index={idx}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                                opacity: snapshot.isDragging ? 0.7 : 1,
+                                marginBottom: 8
+                              }}
+                            >
+                              <MovableScheduleItem
+                                item={item}
+                                isFirst={idx === 0}
+                                isLast={idx === day.items.length - 1}
+                                onEdit={(item) => onEditItem(item, dayIndex)}
+                                onDelete={(itemId) => onDeleteItem(itemId, dayIndex)}
+                                onMoveUp={() => handleMoveUp(idx)}
+                                onMoveDown={() => handleMoveDown(idx)}
+                                onNavigate={onNavigate}
+                                isEditMode={isEditMode}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>予定がありません</p>
+                        <p className="text-sm mt-1">「予定を追加」ボタンから予定を追加してください</p>
+                      </div>
+                    )}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          ) : (
+            <div>
+              {day.items.length > 0 ? (
+                day.items.map((item, idx) => (
+                  <MovableScheduleItem
+                    key={item.id}
+                    item={item}
+                    isFirst={idx === 0}
+                    isLast={idx === day.items.length - 1}
+                    onEdit={() => {}} // 編集モード外では編集不可
+                    onDelete={() => {}} // 編集モード外では削除不可
+                    onMoveUp={() => handleMoveUp(idx)}
+                    onMoveDown={() => handleMoveDown(idx)}
+                    onNavigate={onNavigate}
+                    isEditMode={isEditMode}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>予定がありません</p>
+                  <p className="text-sm mt-1">「予定を追加」ボタンから予定を追加してください</p>
                 </div>
               )}
-            </Droppable>
-          </DragDropContext>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -46,13 +46,14 @@ interface BudgetTabProps {
   travelId?: string;
   userId: string;
   budgetData?: BudgetData;
+  activeTab?: string; // 追加
 }
 
 /**
  * 予算タブコンポーネント
  * 予算管理、支出の追加・編集・削除機能を提供
  */
-const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId }) => {
+const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId, activeTab }) => {
   // 支出データの状態
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
@@ -146,9 +147,42 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId }) => {
         budgets = await budgetApi.getBudgets(travelId, userId);
       }
       setTravelBudget(budgets[0]?.amount || 0);
-      // 必要に応じてsetExpensesも更新
+      // ここを追加
+      const loadedExpenses = budgets.map(b => ({
+        id: b.id,
+        date: b.created_at || '',
+        category: b.breakdown?.category || 'その他',
+        title: b.breakdown?.title || '',
+        amount: b.amount,
+        type: b.breakdown?.type || 'expense',
+      })).filter(e => e.type !== 'initial');
+      setExpenses(loadedExpenses);
     })();
   }, [travelId, userId]);
+
+  // タブがbudgetになったタイミングで最新の予算を取得
+  useEffect(() => {
+    if (activeTab === 'budget' && travelId) {
+      travelApi.getTravel(travelId).then((travel) => {
+        setTravelBudget(travel.budget || 0);
+        let breakdownArr = [];
+        if (Array.isArray(travel.budget_breakdown)) {
+          breakdownArr = travel.budget_breakdown.map((b) => {
+            const editing = categoryBudgets.find(cb => cb.category === b.category)?.isEditing || false;
+            return { ...b, isEditing: editing };
+          });
+        } else if (typeof travel.budget_breakdown === 'object' && travel.budget_breakdown !== null) {
+          breakdownArr = [
+            { category: '交通費', amount: travel.budget_breakdown.transportation || 0, isEditing: categoryBudgets.find(cb => cb.category === '交通費')?.isEditing || false },
+            { category: '宿泊費', amount: travel.budget_breakdown.accommodation || 0, isEditing: categoryBudgets.find(cb => cb.category === '宿泊費')?.isEditing || false },
+            { category: '食費', amount: travel.budget_breakdown.food || 0, isEditing: categoryBudgets.find(cb => cb.category === '食費')?.isEditing || false },
+            { category: '観光費', amount: travel.budget_breakdown.activities || 0, isEditing: categoryBudgets.find(cb => cb.category === '観光費')?.isEditing || false }
+          ];
+        }
+        setCategoryBudgets(breakdownArr);
+      });
+    }
+  }, [activeTab, travelId]);
 
   // 予算計算
   const totalBudget = travelBudget;
@@ -234,7 +268,7 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId }) => {
         title: b.breakdown?.title || '',
         amount: b.amount,
         type: b.breakdown?.type || 'expense',
-      }));
+      })).filter(e => e.type !== 'initial');
       setExpenses(loadedExpenses);
     } else {
       setExpenses(expenses.filter(expense => expense.id !== id));
@@ -248,6 +282,7 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId }) => {
     if (travelId) {
       await budgetApi.createBudget({
         travel_id: travelId,
+        user_id: userId, // ← 追加
         amount: expense.amount,
         breakdown: {
           category: expense.category,
@@ -264,7 +299,7 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId }) => {
         title: b.breakdown?.title || '',
         amount: b.amount,
         type: b.breakdown?.type || 'expense',
-      }));
+      })).filter(e => e.type !== 'initial');
       setExpenses(loadedExpenses);
     } else {
       setExpenses([...expenses, expense]);
@@ -294,7 +329,7 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId }) => {
         title: b.breakdown?.title || '',
         amount: b.amount,
         type: b.breakdown?.type || 'expense',
-      }));
+      })).filter(e => e.type !== 'initial');
       setExpenses(loadedExpenses);
     } else {
       setExpenses(expenses.map(e => e.id === expense.id ? expense : e));

@@ -50,6 +50,8 @@ interface ScheduleTabProps {
   onNavigate?: (tab: string, id?: string) => void;
   places: any[];
   setPlaces: (places: any[]) => void;
+  activeTab?: string; // 追加
+  onTravelInfoUpdate?: (travel: Travel) => void; // 追加
 }
 
 /**
@@ -110,23 +112,18 @@ const generateDaySchedules = (startDate: string, endDate: string, destination: s
  * スケジュールタブコンポーネント
  * スケジュールの管理、アイテムの追加・編集・削除機能を提供
  */
-const ScheduleTab: React.FC<ScheduleTabProps> = ({ travelInfo, onNavigate, places, setPlaces }) => {
+const ScheduleTab: React.FC<ScheduleTabProps> = ({ travelInfo, onNavigate, places, setPlaces, activeTab, onTravelInfoUpdate }) => {
   // スケジュールデータの状態
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
 
   // 旅行情報からスケジュールを初期化
   useEffect(() => {
     if (travelInfo) {
-      // AI生成のスケジュールがある場合はそれを使用
       if (travelInfo.schedule && travelInfo.schedule.length > 0) {
-        // スケジュールデータをDaySchedule形式に変換
         const convertedSchedules: DaySchedule[] = travelInfo.schedule.map((day: any, index: number) => {
-          // 日付を適切にフォーマット
           let dateStr = '';
           let dayStr = '';
-          
           if (day.date) {
-            // ISO形式の日付を日本語形式に変換
             const date = new Date(day.date);
             dateStr = date.toLocaleDateString('ja-JP', {
               year: 'numeric',
@@ -158,7 +155,6 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({ travelInfo, onNavigate, place
         });
         setSchedule(convertedSchedules);
       } else {
-        // AI生成データがない場合は基本情報から生成
         const generatedSchedules = generateDaySchedules(
           travelInfo.startDate,
           travelInfo.endDate,
@@ -167,10 +163,58 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({ travelInfo, onNavigate, place
         setSchedule(generatedSchedules);
       }
     } else {
-      // 旅行情報がない場合は空のスケジュール
       setSchedule([]);
     }
   }, [travelInfo]);
+
+  // activeTabがscheduleになったタイミングで再セット
+  useEffect(() => {
+    if (activeTab === 'schedule' && travelInfo) {
+      if (travelInfo.schedule && travelInfo.schedule.length > 0) {
+        const convertedSchedules: DaySchedule[] = travelInfo.schedule.map((day: any, index: number) => {
+          let dateStr = '';
+          let dayStr = '';
+          if (day.date) {
+            const date = new Date(day.date);
+            dateStr = date.toLocaleDateString('ja-JP', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }).replace(/\//g, '/');
+            dayStr = `Day ${day.dayNumber || index + 1}`;
+          } else {
+            dateStr = day.date || `Day ${index + 1}`;
+            dayStr = day.day || `Day ${index + 1}`;
+          }
+          return {
+            date: dateStr,
+            day: dayStr,
+            dayTitle: day.dayTitle,
+            daySubtitle: day.daySubtitle,
+            items: day.items.map((item: any, itemIndex: number) => ({
+              id: item.id || `${index}-${itemIndex}`,
+              time: item.time || '',
+              endTime: item.endTime || '',
+              title: item.title || '',
+              location: item.location || '',
+              description: item.description || '',
+              category: item.category || 'sightseeing',
+              linkType: item.linkType,
+              linkId: item.linkId
+            }))
+          };
+        });
+        setSchedule(convertedSchedules);
+      } else {
+        const generatedSchedules = generateDaySchedules(
+          travelInfo.startDate,
+          travelInfo.endDate,
+          travelInfo.destination
+        );
+        setSchedule(generatedSchedules);
+      }
+    }
+  }, [activeTab, travelInfo]);
 
   // モーダルの状態
   const [showAddModal, setShowAddModal] = useState(false);
@@ -363,7 +407,10 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({ travelInfo, onNavigate, place
   const saveScheduleToDB = async (newSchedule: DaySchedule[]) => {
     if (travelInfo && travelInfo.id) {
       try {
-        await travelApi.updateTravel(travelInfo.id, { schedule: newSchedule });
+        const updated = await travelApi.updateTravel(travelInfo.id, { schedule: newSchedule });
+        if (onTravelInfoUpdate) {
+          onTravelInfoUpdate(updated); // 親stateも更新
+        }
       } catch (e) {
         // 必要ならエラー通知
         console.error('スケジュールの保存に失敗しました', e);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { Place } from '../../../services/travelApi';
+import { Place, placeApi } from '../../../services/travelApi';
 import PlaceCard from './PlaceCard';
 import PlaceForm from './PlaceForm';
 import Modal from '../../common/Modal';
@@ -35,13 +35,14 @@ interface Place {
 interface PlacesTabProps {
   places: Place[];
   setPlaces: (places: Place[]) => void;
+  onTravelInfoUpdate?: (travel: any) => void; // 追加
 }
 
 /**
  * 観光スポットタブコンポーネント
  * 観光スポットの一覧表示、追加、編集、削除機能を提供
  */
-const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDetailId?: (id: string | null) => void }> = ({ places, setPlaces, placeDetailId, setPlaceDetailId }) => {
+const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDetailId?: (id: string | null) => void }> = ({ places, setPlaces, placeDetailId, setPlaceDetailId, onTravelInfoUpdate }) => {
   // 観光スポットデータの状態
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -98,10 +99,9 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
   /**
    * 削除確認
    */
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deletingPlaceId) {
-      console.log('削除対象ID:', deletingPlaceId);
-      console.log('placesのIDリスト:', places.map(p => p.id));
+      await placeApi.deletePlace(deletingPlaceId);
       setPlaces(prev => prev.filter(place => String(place.id) !== String(deletingPlaceId)));
     }
     setShowDeleteConfirm(false);
@@ -111,18 +111,28 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
   /**
    * 新しい観光スポットを保存
    */
-  const saveNewPlace = (place: Place) => {
-    setPlaces(prev => [...prev, place]);
+  const saveNewPlace = async (place: Place) => {
+    const created = await placeApi.createPlace(place);
+    setPlaces(prev => [...prev, created]);
     setShowAddModal(false);
   };
 
   /**
    * 編集した観光スポットを保存
    */
-  const saveEditedPlace = (place: Place) => {
-    setPlaces(prev => prev.map(p => p.id === place.id ? place : p));
+  const saveEditedPlace = async (place: Place) => {
+    if (!place.id) return;
+    const updated = await placeApi.updatePlace(place.id, place);
+    setPlaces(prev => prev.map(p => p.id === place.id ? updated : p));
     setShowEditModal(false);
     setEditingPlace(null);
+    // 親のtravelInfoも更新
+    if (onTravelInfoUpdate) {
+      onTravelInfoUpdate((prev: any) => {
+        if (!prev) return prev;
+        return { ...prev, places: prev.places.map((p: any) => p.id === place.id ? updated : p) };
+      });
+    }
   };
 
   /**

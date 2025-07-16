@@ -7,6 +7,9 @@ import ShareIcon from '@mui/icons-material/Share';
 import { supabase } from "../../../services/supabase";
 import { travelApi } from '../../../services/travelApi';
 import { memberApi } from '../../../services/memberApi';
+import { budgetApi } from '../../../services/travelApi';
+import { notesApi } from '../../../services/notesApi';
+import { packingApi } from '../../../services/packingApi';
 
 /**
  * 旅行カタログヘッダーコンポーネントのプロパティ
@@ -114,12 +117,48 @@ const TravelCatalogHeader: React.FC<TravelCatalogHeaderProps> = ({ user }) => {
     }
     try {
       for (const user of shareUsersMap[selectedShareTravelId]) {
+        // メンバー追加
         await memberApi.createMember({
           travel_id: selectedShareTravelId,
           name: user.email, // 仮でメールアドレスを名前に
           gender: 'male', // 仮値
           preferences: [], // 仮値
         });
+        // 予算コピー
+        const budgets = await budgetApi.getBudgets(selectedShareTravelId, user.id);
+        for (const b of budgets) {
+          await budgetApi.createBudget({
+            travel_id: selectedShareTravelId,
+            user_id: user.id,
+            amount: b.amount,
+            breakdown: b.breakdown
+          });
+        }
+        // メモコピー
+        const notes = await notesApi.getNotes(selectedShareTravelId, user.id);
+        for (const n of notes) {
+          await notesApi.createNote({
+            travel_id: selectedShareTravelId,
+            user_id: user.id,
+            title: n.title,
+            content: n.content,
+            category: n.category,
+            is_pinned: n.is_pinned
+          });
+        }
+        // 持ち物コピー
+        const items = await packingApi.getPackingItems(selectedShareTravelId, user.id);
+        for (const i of items) {
+          await packingApi.createPackingItem({
+            travel_id: selectedShareTravelId,
+            user_id: user.id,
+            name: i.name,
+            category: i.category,
+            quantity: i.quantity || 1,
+            is_packed: false,
+            is_essential: i.is_essential || false
+          });
+        }
       }
       alert('共有が完了しました');
       setIsShareModalOpen(false);

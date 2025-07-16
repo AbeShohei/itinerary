@@ -184,9 +184,9 @@ function App() {
 
     switch (activeTab) {
       case 'schedule':
-        return selectedTravel ? <ScheduleTab travelInfo={selectedTravel} onNavigate={handleNavigate} places={places} setPlaces={setPlaces} /> : null;
+        return selectedTravel ? <ScheduleTab travelInfo={selectedTravel} onNavigate={handleNavigate} places={places} setPlaces={setPlaces} activeTab={activeTab} onTravelInfoUpdate={setSelectedTravel} /> : null;
       case 'places':
-        return <PlacesTab places={places} setPlaces={setPlaces} placeDetailId={placeDetailId} setPlaceDetailId={setPlaceDetailId} />;
+        return <PlacesTab places={places} setPlaces={setPlaces} placeDetailId={placeDetailId} setPlaceDetailId={setPlaceDetailId} onTravelInfoUpdate={setSelectedTravel} />;
       case 'ai-recommendations':
         return <AIRecommendationsTab 
           onAddToPlaces={handleAddToPlaces}
@@ -194,7 +194,7 @@ function App() {
           setRecommendations={setRecommendations}
         />;
       case 'budget':
-        return selectedTravel && typeof selectedTravel.id === 'string' ? <BudgetTab travelId={selectedTravel.id} userId={user.id} /> : null;
+        return selectedTravel && typeof selectedTravel.id === 'string' ? <BudgetTab travelId={selectedTravel.id} userId={user.id} activeTab={activeTab} /> : null;
       case 'room-assignment':
         return selectedTravel && typeof selectedTravel.id === 'string' ? (
           <RoomAssignmentTab travelInfo={{
