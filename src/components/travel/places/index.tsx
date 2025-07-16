@@ -96,12 +96,17 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
     setShowDeleteConfirm(true);
   };
 
+  const isUuid = (id: string) => /^[0-9a-fA-F-]{36}$/.test(id);
+
   /**
    * 削除確認
    */
   const confirmDelete = async () => {
     if (deletingPlaceId) {
-      await placeApi.deletePlace(deletingPlaceId);
+      if (isUuid(deletingPlaceId)) {
+        await placeApi.deletePlace(deletingPlaceId);
+      }
+      // uuidでなくてもローカルからは消す
       setPlaces(prev => prev.filter(place => String(place.id) !== String(deletingPlaceId)));
     }
     setShowDeleteConfirm(false);
@@ -112,7 +117,9 @@ const PlacesTab: React.FC<PlacesTabProps & { placeDetailId?: string, setPlaceDet
    * 新しい観光スポットを保存
    */
   const saveNewPlace = async (place: Place) => {
-    const created = await placeApi.createPlace(place);
+    // idを除去してAPIに渡す
+    const { id, ...placeWithoutId } = place;
+    const created = await placeApi.createPlace(placeWithoutId);
     setPlaces(prev => [...prev, created]);
     setShowAddModal(false);
   };
