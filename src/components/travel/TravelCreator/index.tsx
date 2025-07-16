@@ -120,7 +120,6 @@ const TravelCreator: React.FC<TravelCreatorProps> = ({ onBack, onComplete, user 
       setError(null);
       
       // ダミーデータを生成
-      const dummyPlaces = generateDummyPlaces();
       const dummyRooms = generateDummyRooms(formData.memberCount);
       
       // テンプレートを生成
@@ -162,10 +161,10 @@ const TravelCreator: React.FC<TravelCreatorProps> = ({ onBack, onComplete, user 
         description: formData.description,
         status: 'planning' as const,
         schedule: templates.schedule,
-        places: dummyPlaces,
-        budget_breakdown: breakdownArr, // ←必ずセット
-        roomAssignments: dummyRooms,
-        packingList: templates.packingList,
+        places: [], // 観光スポットは空
+        budget_breakdown: [], // 予算内訳も空
+        roomAssignments: [], // 部屋割りも空
+        packingList: [], // 持ち物も空
         travelType: formData.travelType,
         user_id: user.id, // ←追加
       };

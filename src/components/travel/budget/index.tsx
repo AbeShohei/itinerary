@@ -134,7 +134,7 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ travelId, userId, activeTab }) =>
 
   // 支出履歴をSupabaseから取得
   useEffect(() => {
-    if (!travelId || !userId) return;
+    if (!travelId || !userId) return; // userIdがundefinedなら何もしない
     (async () => {
       let budgets = await budgetApi.getBudgets(travelId, userId);
       if (budgets.length === 0) {

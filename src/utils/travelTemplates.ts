@@ -103,11 +103,9 @@ export const generateScheduleTemplate = (startDate: string, endDate: string): Sc
       dayNumber,
       items: [
         { id: `item-${dayNumber}-1`, time: '08:00', title: '朝食', category: 'food', location: 'ホテル' },
-        { id: `item-${dayNumber}-2`, time: '10:00', title: '観光地A', category: 'sightseeing', location: '観光地A' },
-        { id: `item-${dayNumber}-3`, time: '12:00', title: '昼食', category: 'food', location: 'レストラン' },
-        { id: `item-${dayNumber}-4`, time: '14:00', title: '観光地B', category: 'sightseeing', location: '観光地B' },
-        { id: `item-${dayNumber}-5`, time: '18:00', title: '夕食', category: 'food', location: 'レストラン' },
-        { id: `item-${dayNumber}-6`, time: '20:00', title: 'ホテルで休憩', category: 'accommodation', location: 'ホテル' }
+        { id: `item-${dayNumber}-2`, time: '12:00', title: '昼食', category: 'food', location: 'レストラン' },
+        { id: `item-${dayNumber}-3`, time: '18:00', title: '夕食', category: 'food', location: 'レストラン' },
+        { id: `item-${dayNumber}-4`, time: '20:00', title: 'ホテルで休憩', category: 'accommodation', location: 'ホテル' }
       ]
     });
     currentDate.setDate(currentDate.getDate() + 1);
@@ -219,16 +217,6 @@ export const generateTravelTemplates = (
     packingList: generatePackingList(travelType, days)
   };
 }; 
-
-/**
- * ダミーの観光スポットデータ
- */
-export const generateDummyPlaces = () => [
-  { id: 'place-1', name: '観光地A', category: '観光', description: '有名な観光地', address: '', rating: 4.0, image: '', openingHours: '', priceRange: '', isFavorite: false },
-  { id: 'place-2', name: '観光地B', category: '観光', description: '人気の観光地', address: '', rating: 4.0, image: '', openingHours: '', priceRange: '', isFavorite: false },
-  { id: 'place-3', name: 'レストラン', category: 'グルメ', description: '地元の料理が楽しめる', address: '', rating: 4.0, image: '', openingHours: '', priceRange: '', isFavorite: false },
-  { id: 'place-4', name: 'ホテル', category: '宿泊', description: '快適なホテル', address: '', rating: 4.0, image: '', openingHours: '', priceRange: '', isFavorite: false }
-];
 
 /**
  * ダミーの部屋割りデータ

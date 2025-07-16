@@ -85,31 +85,34 @@ const NotesTab: React.FC<NotesTabProps> = ({ travelId, userId }) => {
   // DBからメモを取得
   useEffect(() => {
     if (!travelId || !userId) return;
-    (async () => {
-      let notes = await notesApi.getNotes(travelId, userId);
-      if (notes.length === 0) {
-        await notesApi.createNote({
-          travel_id: travelId,
-          user_id: userId,
-          title: '最初のメモ',
-          content: '',
-          category: '旅行準備',
-          is_pinned: false,
-        });
-        notes = await notesApi.getNotes(travelId, userId);
+    const fetchNotes = async () => {
+      try {
+        let notes = await notesApi.getNotes(travelId, userId);
+        setNotes(notes.map(dbNoteToUi));
+      } catch (e) {
+        alert('メモの取得に失敗しました');
+        console.error(e);
       }
-      setNotes(notes.map(dbNoteToUi));
-    })();
+    };
+    fetchNotes();
   }, [travelId, userId]);
 
   /**
    * ピン留め切り替え
    */
   const togglePin = async (id: string) => {
+    if (!travelId || !userId) return;
     const note = notes.find(n => n.id === id);
     if (!note) return;
-    const updated = await notesApi.updateNote({ ...uiNoteToDb({ ...note, isPinned: !note.isPinned }, travelId), id });
-    setNotes(notes.map(n => n.id === id ? dbNoteToUi(updated) : n));
+    try {
+      await notesApi.updateNote({ ...uiNoteToDb({ ...note, isPinned: !note.isPinned }, travelId), id });
+      // 最新リスト再取得
+      const notes = await notesApi.getNotes(travelId, userId);
+      setNotes(notes.map(dbNoteToUi));
+    } catch (e) {
+      alert('ピン留めの更新に失敗しました');
+      console.error(e);
+    }
   };
 
   /**
@@ -136,11 +139,17 @@ const NotesTab: React.FC<NotesTabProps> = ({ travelId, userId }) => {
   };
   // 確認OK時の実処理
   const confirmDelete = async () => {
-    if (deletingNoteId) {
+    if (!deletingNoteId || !travelId || !userId) return;
+    try {
       await notesApi.deleteNote(deletingNoteId);
-      setNotes(notes.filter(note => note.id !== deletingNoteId));
+      // 最新リスト再取得
+      const notes = await notesApi.getNotes(travelId, userId);
+      setNotes(notes.map(dbNoteToUi));
       setDeletingNoteId(null);
       setShowDeleteConfirm(false);
+    } catch (e) {
+      alert('メモの削除に失敗しました');
+      console.error(e);
     }
   };
   // キャンセル時
@@ -153,19 +162,35 @@ const NotesTab: React.FC<NotesTabProps> = ({ travelId, userId }) => {
    * 新しいメモを保存
    */
   const saveNewNote = async (note: Note) => {
-    const dbNote = await notesApi.createNote(uiNoteToDb(note, travelId));
-    setNotes([dbNoteToUi(dbNote), ...notes]);
-    setShowAddModal(false);
+    if (!travelId || !userId) return;
+    try {
+      await notesApi.createNote(uiNoteToDb(note, travelId));
+      // 最新リスト再取得
+      const notes = await notesApi.getNotes(travelId, userId);
+      setNotes(notes.map(dbNoteToUi));
+      setShowAddModal(false);
+    } catch (e) {
+      alert('メモの追加に失敗しました');
+      console.error(e);
+    }
   };
 
   /**
    * 編集したメモを保存
    */
   const saveEditedNote = async (note: Note) => {
-    const updated = await notesApi.updateNote({ ...uiNoteToDb(note, travelId), id: note.id });
-    setNotes(notes.map(n => n.id === note.id ? dbNoteToUi(updated) : n));
-    setShowEditModal(false);
-    setEditingNote(null);
+    if (!travelId || !userId) return;
+    try {
+      await notesApi.updateNote({ ...uiNoteToDb(note, travelId), id: note.id });
+      // 最新リスト再取得
+      const notes = await notesApi.getNotes(travelId, userId);
+      setNotes(notes.map(dbNoteToUi));
+      setShowEditModal(false);
+      setEditingNote(null);
+    } catch (e) {
+      alert('メモの更新に失敗しました');
+      console.error(e);
+    }
   };
 
   /**

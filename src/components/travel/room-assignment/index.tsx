@@ -205,9 +205,10 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
   useEffect(() => {
     if (travelInfo?.id) {
       memberApi.getMembers(travelInfo.id).then(async (members) => {
-        setMembers(members);
-        // 初回のみテンプレートメンバーを自動生成
-        if (members.length === 0 && travelInfo.memberCount) {
+        if (members.length > 0) {
+          setMembers(members);
+        } else if (travelInfo.memberCount) {
+          // DBにいない場合のみ一度だけテンプレートメンバーを生成
           const templateMembers = Array.from({ length: travelInfo.memberCount }).map((_, i) => ({
             name: `メンバー${i + 1}`,
             gender: Math.random() > 0.5 ? 'male' : 'female',
@@ -449,8 +450,10 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
    */
   const addMember = async (member: Omit<Member, 'id' | 'created_at'>) => {
     if (travelInfo?.id) {
-      const newMember = await memberApi.createMember({ ...member, travel_id: travelInfo.id });
-      setMembers(prev => [...prev, newMember]);
+      await memberApi.createMember({ ...member, travel_id: travelInfo.id });
+      // 追加後はDBから再取得
+      const members = await memberApi.getMembers(travelInfo.id);
+      setMembers(members);
     }
     setShowAddMember(false);
   };
@@ -665,14 +668,22 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
 
   // メンバー編集
   const editMember = async (id: string, updates: Partial<Member>) => {
-    const updated = await memberApi.updateMember(id, updates);
-    setMembers(prev => prev.map(m => m.id === id ? updated : m));
+    if (travelInfo?.id) {
+      await memberApi.updateMember(id, updates);
+      // 編集後はDBから再取得
+      const members = await memberApi.getMembers(travelInfo.id);
+      setMembers(members);
+    }
   };
 
   // メンバー削除
   const deleteMember = async (id: string) => {
-    await memberApi.deleteMember(id);
-    setMembers(prev => prev.filter(m => m.id !== id));
+    if (travelInfo?.id) {
+      await memberApi.deleteMember(id);
+      // 削除後はDBから再取得
+      const members = await memberApi.getMembers(travelInfo.id);
+      setMembers(members);
+    }
   };
 
   return (

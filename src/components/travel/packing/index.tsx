@@ -127,9 +127,14 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
 
   // Supabaseから持ち物リストを取得
   const fetchPackingItems = async () => {
-    if (!travelId) return;
-    const data = await packingApi.getPackingItems(travelId, userId);
-    setItems(data);
+    if (!travelId || !userId) return;
+    try {
+      const data = await packingApi.getPackingItems(travelId, userId);
+      setItems(data);
+    } catch (e) {
+      alert('持ち物リストの取得に失敗しました');
+      console.error(e);
+    }
   };
 
   // 初期ロード・DBにデータがなければテンプレートをinsert
@@ -137,30 +142,29 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
     if (!travelId || !userId || initializedRef.current) return;
     initializedRef.current = true;
     (async () => {
-      let items = await packingApi.getPackingItems(travelId, userId);
-      if (items.length === 0) {
-        await packingApi.createPackingItem({
-          travel_id: travelId,
-          user_id: userId,
-          name: 'パスポート',
-          category: '必需品',
-          quantity: 1,
-          is_packed: false,
-          is_essential: true,
-        });
-        items = await packingApi.getPackingItems(travelId, userId);
+      try {
+        const items = await packingApi.getPackingItems(travelId, userId);
+        setItems(items);
+      } catch (e) {
+        alert('持ち物リストの初期化に失敗しました');
+        console.error(e);
       }
-      setItems(items);
     })();
     // eslint-disable-next-line
   }, [travelId, userId, travelType, JSON.stringify(packingData)]);
 
   // パッキング状態切り替え
   const togglePacked = async (id: string) => {
+    if (!travelId || !userId) return;
     const item = items.find(i => i.id === id);
     if (!item) return;
-    await packingApi.updatePackingItem(id, { is_packed: !item.is_packed });
-    await fetchPackingItems();
+    try {
+      await packingApi.updatePackingItem(id, { is_packed: !item.is_packed });
+      await fetchPackingItems();
+    } catch (e) {
+      alert('パッキング状態の更新に失敗しました');
+      console.error(e);
+    }
   };
 
   // アイテム追加
@@ -182,40 +186,57 @@ const PackingTab: React.FC<PackingTabProps> = ({ travelId, userId, packingData, 
 
   // アイテム削除
   const confirmDelete = async () => {
-    if (deletingItemId) {
+    if (!deletingItemId || !travelId || !userId) return;
+    try {
       await packingApi.deletePackingItem(deletingItemId);
       setShowDeleteConfirm(false);
       setDeletingItemId(null);
       await fetchPackingItems();
+    } catch (e) {
+      alert('持ち物の削除に失敗しました');
+      console.error(e);
     }
   };
 
   // アイテム追加
   const saveNewItem = async (item: PackingItemDB) => {
-    await packingApi.createPackingItem({
-      travel_id: travelId,
-      name: item.name,
-      category: item.category,
-      quantity: item.quantity,
-      is_packed: item.is_packed,
-      is_essential: item.is_essential
-    });
-    setShowAddItemModal(false);
-    await fetchPackingItems();
+    if (!travelId || !userId) return;
+    try {
+      await packingApi.createPackingItem({
+        travel_id: travelId,
+        user_id: userId,
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        is_packed: item.is_packed,
+        is_essential: item.is_essential
+      });
+      setShowAddItemModal(false);
+      await fetchPackingItems();
+    } catch (e) {
+      alert('持ち物の追加に失敗しました');
+      console.error(e);
+    }
   };
 
   // アイテム編集
   const saveEditedItem = async (item: PackingItemDB) => {
-    await packingApi.updatePackingItem(item.id!, {
-      name: item.name,
-      category: item.category,
-      quantity: item.quantity,
-      is_essential: item.is_essential,
-      is_packed: item.is_packed
-    });
-    setShowEditItemModal(false);
-    setEditingItem(null);
-    await fetchPackingItems();
+    if (!travelId || !userId) return;
+    try {
+      await packingApi.updatePackingItem(item.id!, {
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        is_essential: item.is_essential,
+        is_packed: item.is_packed
+      });
+      setShowEditItemModal(false);
+      setEditingItem(null);
+      await fetchPackingItems();
+    } catch (e) {
+      alert('持ち物の更新に失敗しました');
+      console.error(e);
+    }
   };
 
   // カテゴリ追加・削除はローカルのみ

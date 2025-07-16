@@ -132,11 +132,10 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ place, onSave, onCancel }) => {
    */
   const handleSave = () => {
     if (isFormValid()) {
-      const newPlace: Place = {
-        id: place?.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36).slice(2)),
+      let newPlace: Partial<Place> = {
         name: formData.name!,
-        category: formData.category!, // サブカテゴリのみ
-        mainCategory: formData.mainCategory!, // mainCategoryも保存
+        category: formData.category!,
+        mainCategory: formData.mainCategory!,
         rating: formData.rating!,
         image: formData.image || 'https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=400',
         description: formData.description!,
@@ -147,7 +146,10 @@ const PlaceForm: React.FC<PlaceFormProps> = ({ place, onSave, onCancel }) => {
         priceRange: formData.priceRange!,
         isFavorite: formData.isFavorite || false
       };
-      onSave(newPlace);
+      if (place?.id) {
+        newPlace = { ...newPlace, id: place.id };
+      }
+      onSave(newPlace as Place);
     }
   };
 
