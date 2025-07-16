@@ -162,7 +162,7 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
   useEffect(() => {
     if (travelInfo?.id) {
       roomAssignmentApi.getRoomAssignments(travelInfo.id).then((data) => {
-        setRooms(data.map((r: any) => ({
+        const roomData = data.map((r: any) => ({
           id: r.id,
           room_number: r.room_number,
           name: r.room_name, // ←ここで必ずnameにマッピング
@@ -174,7 +174,26 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
           stay_dates: r.stay_dates, // stay_datesを追加
           check_in: r.check_in,
           check_out: r.check_out,
-        })));
+        }));
+        setRooms(roomData);
+        
+        // 部屋割り当て情報を初期化（初回のみ）
+        if (dayAssignments.length > 0) {
+          const initialAssignments: { [roomId: string]: string[] } = {};
+          data.forEach((r: any) => {
+            if (r.members && r.members.length > 0) {
+              initialAssignments[r.room_number] = r.members;
+            }
+          });
+          
+          // 初日の割り当て情報を設定
+          const updatedDayAssignments = dayAssignments.map((day, index) => 
+            index === 0 
+              ? { ...day, roomAssignments: initialAssignments }
+              : day
+          );
+          setDayAssignments(updatedDayAssignments);
+        }
       });
     }
   }, [travelInfo?.id]);
@@ -187,6 +206,39 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
       });
     }
   }, [travelInfo?.id, travelInfo?.memberCount]);
+
+  // 日付変更時にその日の割り当て情報を取得
+  useEffect(() => {
+    if (travelInfo?.id && dayAssignments.length > 0 && currentDayIndex >= 0) {
+      roomAssignmentApi.getRoomAssignments(travelInfo.id).then((data) => {
+        const currentDateStr = dayAssignments[currentDayIndex]?.date?.split(' ')[0]?.replace(/\(|\)/g, '').replaceAll('/', '-');
+        
+        // 現在の日付に該当する部屋の割り当て情報を取得
+        const currentDayAssignments: { [roomId: string]: string[] } = {};
+        data.forEach((r: any) => {
+          if (r.members && r.members.length > 0) {
+            // 部屋が現在の日付に該当するかチェック
+            if (r.check_in && r.check_out && currentDateStr) {
+              const checkIn = new Date(r.check_in);
+              const checkOut = new Date(r.check_out);
+              const current = new Date(currentDateStr);
+              if (checkIn <= current && current < checkOut) {
+                currentDayAssignments[r.room_number] = r.members;
+              }
+            }
+          }
+        });
+        
+        // 現在の日の割り当て情報を更新
+        const updatedDayAssignments = dayAssignments.map((day, index) => 
+          index === currentDayIndex 
+            ? { ...day, roomAssignments: currentDayAssignments }
+            : day
+        );
+        setDayAssignments(updatedDayAssignments);
+      });
+    }
+  }, [travelInfo?.id, currentDayIndex, dayAssignments.length]);
 
   // 宿泊日数を取得
   const getStayNights = () => {
@@ -299,6 +351,23 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
       // DBにも反映
       if (room.id) {
         await roomAssignmentApi.updateRoomAssignment(room.id, { members: newAssignments[roomNumber] });
+        // 保存後に再取得
+        if (travelInfo?.id) {
+          const data = await roomAssignmentApi.getRoomAssignments(travelInfo.id);
+          setRooms(data.map((r: any) => ({
+            id: r.id,
+            room_number: r.room_number,
+            name: r.room_name,
+            type: r.type,
+            capacity: r.capacity,
+            pricePerNight: r.pricePerNight,
+            amenities: r.amenities,
+            isAvailable: r.isAvailable !== false,
+            stay_dates: r.stay_dates,
+            check_in: r.check_in,
+            check_out: r.check_out,
+          })));
+        }
       }
     }
   };
@@ -320,13 +389,30 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
     const room = rooms.find(r => r.room_number === roomNumber);
     if (room && room.id) {
       await roomAssignmentApi.updateRoomAssignment(room.id, { members: newMembers });
+      // 保存後に再取得
+      if (travelInfo?.id) {
+        const data = await roomAssignmentApi.getRoomAssignments(travelInfo.id);
+        setRooms(data.map((r: any) => ({
+          id: r.id,
+          room_number: r.room_number,
+          name: r.room_name,
+          type: r.type,
+          capacity: r.capacity,
+          pricePerNight: r.pricePerNight,
+          amenities: r.amenities,
+          isAvailable: r.isAvailable !== false, // undefinedならtrue
+          stay_dates: r.stay_dates, // stay_datesを追加
+          check_in: r.check_in,
+          check_out: r.check_out,
+        })));
+      }
     }
   };
 
   /**
    * 前日の割り当てをコピー
    */
-  const copyFromPreviousDay = () => {
+  const copyFromPreviousDay = async () => {
     if (currentDayIndex > 0) {
       const previousAssignments = dayAssignments[currentDayIndex - 1].roomAssignments;
       const updatedDayAssignments = dayAssignments.map((day, index) => 
@@ -335,6 +421,14 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
           : day
       );
       setDayAssignments(updatedDayAssignments);
+      
+      // DBにも反映
+      for (const room of rooms) {
+        const roomMembers = previousAssignments[room.room_number] || [];
+        if (room.id) {
+          await roomAssignmentApi.updateRoomAssignment(room.id, { members: roomMembers });
+        }
+      }
     }
   };
 
@@ -350,7 +444,7 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
   /**
    * 全期間の自動割り当て（連泊対応）
    */
-  const autoAssignAllDays = () => {
+  const autoAssignAllDays = async () => {
     // 1日目の割り当てを生成
     const unassignedMembers = getUnassignedMembers();
     const availableRooms = rooms.filter(room => room.isAvailable);
@@ -374,12 +468,20 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
       roomAssignments: { ...newAssignments }
     }));
     setDayAssignments(updatedDayAssignments);
+    
+    // DBにも反映
+    for (const room of availableRooms) {
+      const roomMembers = newAssignments[room.room_number] || [];
+      if (room.id) {
+        await roomAssignmentApi.updateRoomAssignment(room.id, { members: roomMembers });
+      }
+    }
   };
 
   /**
    * 自動割り当て
    */
-  const autoAssignRooms = () => {
+  const autoAssignRooms = async () => {
     const unassignedMembers = getUnassignedMembers();
     const availableRooms = rooms.filter(room => room.isAvailable);
     
@@ -404,6 +506,14 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
         : day
     );
     setDayAssignments(updatedDayAssignments);
+    
+    // DBにも反映
+    for (const room of availableRooms) {
+      const roomMembers = newAssignments[room.room_number] || [];
+      if (room.id) {
+        await roomAssignmentApi.updateRoomAssignment(room.id, { members: roomMembers });
+      }
+    }
   };
 
   /**
@@ -469,6 +579,8 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
         amenities: r.amenities,
         isAvailable: r.isAvailable !== false, // undefinedならtrue
         stay_dates: r.stay_dates, // stay_datesを追加
+        check_in: r.check_in,
+        check_out: r.check_out,
       })));
     }
     setShowBulkAddRoom(false);
@@ -529,6 +641,8 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
         amenities: r.amenities,
         isAvailable: r.isAvailable !== false, // undefinedならtrue
         stay_dates: r.stay_dates, // stay_datesを追加
+        check_in: r.check_in,
+        check_out: r.check_out,
       })));
     }
     // 日別割り当てからも削除（既存ロジック）
@@ -546,7 +660,7 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
   /**
    * 割り当てを全解除
    */
-  const resetAllAssignments = () => {
+  const resetAllAssignments = async () => {
     // 現在の日の割り当てを全てクリア
     const updatedDayAssignments = dayAssignments.map((day, index) => 
       index === currentDayIndex 
@@ -554,6 +668,13 @@ const RoomAssignmentTab: React.FC<RoomAssignmentTabProps> = ({ travelInfo }) => 
         : day
     );
     setDayAssignments(updatedDayAssignments);
+    
+    // DBにも反映
+    for (const room of rooms) {
+      if (room.id) {
+        await roomAssignmentApi.updateRoomAssignment(room.id, { members: [] });
+      }
+    }
   };
 
   /**
